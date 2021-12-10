@@ -1,11 +1,26 @@
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 //Testing using the observer pattern
 public class TestBar {
+
+    private StringRecipe getRecipe() {
+        StringInverter si = new StringInverter();
+        StringCaseChanger cc = new StringCaseChanger();
+        StringReplacer sr = new StringReplacer('A', 'X');
+        List<StringTransformer> transformers = new ArrayList<>();
+        transformers.add(si);
+        transformers.add(cc);
+        transformers.add(sr);
+        StringRecipe recipe = new StringRecipe(transformers);
+        return recipe;
+    }
+
     @Test
     public void happyHour() {
         Bar bar = new StringBar();
@@ -42,6 +57,57 @@ public class TestBar {
         bar.endHappyHour();
         Mockito.verify(clientMock, Mockito.never()).happyHourStarted(bar);
         Mockito.verify(clientMock, Mockito.never()).happyHourEnded(bar);
+    }
+
+    @Test
+    public void orderStringRecipe() {
+        StringBar stringBar = new StringBar();
+        StringDrink drink = new StringDrink("AbCd-aBcD");
+        StringRecipe recipe = getRecipe();
+        stringBar.order(drink, recipe);
+        assertEquals("dCbX-DcBa", drink.getText());
+    }
+
+    @Test
+    public void impatientStrategy() {
+        StringBar stringBar = new StringBar();
+        StringDrink drink = new StringDrink("AbCd-aBcD");
+        StringRecipe recipe = getRecipe();
+        ImpatientStrategy strategy = new ImpatientStrategy();
+        HumanClient client = new HumanClient(strategy);
+        // Recipe is ordered immediately
+        client.wants(drink, recipe, stringBar);
+        assertEquals("dCbX-DcBa", drink.getText());
+    }
+
+    @Test
+    public void smartStrategyStartOpened() {
+        StringBar stringBar = new StringBar();
+        StringDrink drink = new StringDrink("AbCd-aBcD");
+        StringRecipe recipe = getRecipe();
+        SmartStrategy strategy = new SmartStrategy();
+        HumanClient client = new HumanClient(strategy);
+        stringBar.addObserver(client); //tive de adicionar
+        // Recipe is ordered immediately as happy hour was already under way
+        stringBar.startHappyHour();
+        client.wants(drink, recipe, stringBar);
+        assertEquals("dCbX-DcBa", drink.getText());
+    }
+
+    @Test
+    public void smartStrategyStartClosed() {
+        StringBar stringBar = new StringBar();
+        StringDrink drink = new StringDrink("AbCd-aBcD");
+        StringRecipe recipe = getRecipe();
+        SmartStrategy strategy = new SmartStrategy();
+        HumanClient client = new HumanClient(strategy);
+        stringBar.addObserver(client); // this is important!
+        client.wants(drink, recipe, stringBar);
+        assertEquals("AbCd-aBcD", drink.getText());
+        // Recipe is only ordered here
+        stringBar.startHappyHour();
+        client.wants(drink, recipe, stringBar);//tive de adicionar
+        assertEquals("dCbX-DcBa", drink.getText());
     }
 
 }
