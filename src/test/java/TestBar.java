@@ -87,7 +87,6 @@ public class TestBar {
         StringRecipe recipe = getRecipe();
         SmartStrategy strategy = new SmartStrategy();
         HumanClient client = new HumanClient(strategy);
-        stringBar.addObserver(client); //tive de adicionar
         // Recipe is ordered immediately as happy hour was already under way
         stringBar.startHappyHour();
         client.wants(drink, recipe, stringBar);
@@ -106,7 +105,6 @@ public class TestBar {
         assertEquals("AbCd-aBcD", drink.getText());
         // Recipe is only ordered here
         stringBar.startHappyHour();
-        client.wants(drink, recipe, stringBar);//tive de adicionar
         assertEquals("dCbX-DcBa", drink.getText());
     }
 

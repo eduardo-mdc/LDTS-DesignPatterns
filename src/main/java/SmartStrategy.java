@@ -3,23 +3,33 @@ import java.util.List;
 
 public class SmartStrategy implements OrderingStrategy{
 
-    private List<StringBar> happyBars;
+    private List<StringDrink> drinks;
+    private List<StringRecipe> recipes;
 
     SmartStrategy(){
-        happyBars = new ArrayList<StringBar>();
+        drinks = new ArrayList<StringDrink>();
+        recipes = new ArrayList<StringRecipe>();
     }
 
     public void wants(StringDrink drink, StringRecipe recipe, StringBar bar) {
-        if(happyBars.contains(bar)) bar.order(drink,recipe);
+        if(bar.isHappyHour()){
+            bar.order(drink,recipe);
+        }
+        else{
+            drinks.add(drink);
+            recipes.add(recipe);
+        }
     }
 
     public void happyHourStarted(StringBar bar) {
-        happyBars.add(bar);
+        for(int i = 0; i < drinks.size() ; i++){
+            bar.order(drinks.get(i),recipes.get(i));
+            drinks.remove(i);
+            recipes.remove(i);
+        }
     }
 
     public void happyHourEnded(StringBar bar){
-        while(happyBars.contains(bar)){
-            happyBars.remove(bar);
-        }
+
     }
 }
